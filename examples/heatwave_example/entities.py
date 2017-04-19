@@ -1,4 +1,6 @@
 import collections
+import threading
+
 import numpy as np
 
 
@@ -8,11 +10,11 @@ class MeasurementVector():
         self.vector.temperature = 0
 
 
-class Space(object):
+class World(object):
     def __init__(self):
         self.length = 50
         self.width = 50
-        self.points = [[MeasurementVector() for i in range(self.length)] for j in range(self.width)]
+        self.space = [[MeasurementVector() for i in range(self.length)] for j in range(self.width)]
 
     def transformation(self):
         # heating device
@@ -21,30 +23,40 @@ class Space(object):
             gr[iGr, -iGr - 1] = 2000
         for i in range(0, 10):
             for j in range(0, 10):
-                point = self.points[i + 20][j + 10]
+                point = self.space[i + 20][j + 10]
                 if gr[i, j]:
                     point.vector.temperature = gr[i, j]
         for i in range(0, 10):
             for j in range(0, 10):
-                point = self.points[i + 20][j + 30]
+                point = self.space[i + 20][j + 30]
                 if gr[i, j]:
                     point.vector.temperature = gr[i, j]
 
             for j in range(1, self.length - 1):
                 for i in range(1, self.width - 1):
-                    self.points[i][j].vector.temperature = (self.points[i - 1][j].vector.temperature
-                                                            + self.points[i + 1][j].vector.temperature
-                                                            + self.points[i][j - 1].vector.temperature
-                                                            + self.points[i][j + 1].vector.temperature) / 4
+                    self.space[i][j].vector.temperature = (self.space[i - 1][j].vector.temperature
+                                                           + self.space[i + 1][j].vector.temperature
+                                                           + self.space[i][j - 1].vector.temperature
+                                                           + self.space[i][j + 1].vector.temperature) / 4
 
             # Re-assert heaters
             for i in range(0, 10):
                 for j in range(0, 10):
-                    point = self.points[i + 20][j + 10]
+                    point = self.space[i + 20][j + 10]
                     if gr[i, j]:
                         point.vector.temperature = gr[i, j]
             for i in range(0, 10):
                 for j in range(0, 10):
-                    point = self.points[i + 20][j + 30]
+                    point = self.space[i + 20][j + 30]
                     if gr[i, j]:
                         point.vector.temperature = gr[i, j]
+
+    def start_time_transformation(self):
+        #TODO: make world initialization
+        self.transformation()
+        self.update_rate = 5
+
+        def transform_each_seconds():
+            self.transformation()
+            threading.Timer(self.update_rate, transform_each_seconds).start()
+        transform_each_seconds()
