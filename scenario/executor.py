@@ -6,13 +6,18 @@ STEPS_FUN_KEY = "steps_fun"
 SECONDS_KEY = "seconds"
 START_TIME_KEY = "start"
 
+queues_dictionary = {}
 
-queues_dictionary = {"iteration_completed" : Queue()}
+
+def emit_event(event_name):
+    if event_name not in queues_dictionary.keys():
+        queues_dictionary[event_name] = Queue()
+    queues_dictionary[event_name].put(1)
 
 
 class ConditionalTimer(threading.Timer):
-    def __init__(self, interval, function, condition, args=None, kwargs=None):
-        threading.Timer.__init__(self, interval=interval, function=function, args=args, kwargs=kwargs)
+    def __init__(self, interval, function_arg, condition, args=None, kwargs=None):
+        threading.Timer.__init__(self, interval=interval, function=function_arg, args=args, kwargs=kwargs)
         self.condition = condition
 
     def run(self):
@@ -21,7 +26,7 @@ class ConditionalTimer(threading.Timer):
         threading.Timer.run(self)
 
 
-class Executor():
+class Executor:
     def __init__(self):
         self.cond = threading.Condition()
 
@@ -74,8 +79,26 @@ def every_event(steps_fun, *args, **kwargs):
             steps_fun()
 
     if steps_fun.__name__ == "steps":
+        event_name = kwargs["event"]
+        if event_name not in queues_dictionary.keys():
+            queues_dictionary[event_name] = Queue()
         threading.Thread(target=execute, args=()).start()
         return steps_fun
+
+
+@parametrized
+def on_event(steps_fun, **kwargs):
+    def execute():
+        queues_dictionary[event_name].get(block=True)
+        steps_fun()
+
+    if steps_fun.__name__ == "steps":
+        event_name = kwargs["event"]
+        if event_name not in queues_dictionary.keys():
+            queues_dictionary[event_name] = Queue()
+        threading.Thread(target=execute, args=()).start()
+        return steps_fun
+
 
 def start_world(world):
     executor.start(world)
