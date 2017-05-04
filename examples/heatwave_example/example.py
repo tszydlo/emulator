@@ -1,9 +1,12 @@
 from time import sleep
 
+from client import MQTTClient
+from client.converter import convert_from_celsius
 from examples.heatwave_example.entities import World
 from scenario.executor import after, every_event, every, start_world, emit_event, on_event, queues_dictionary
 
 world = World()
+client = MQTTClient.LM35_V(2, 0)
 
 
 @every_event(event=World.ITERATION_COMPLETED)
@@ -13,27 +16,35 @@ def steps():
         emit_event("third_iteration")
     if iteration % 7 == 0:
         emit_event("seventh_iteration")
-    print("Iteration has completed: " + str(world.iteration_counter))
+    # print("Iteration has completed: " + str(world.iteration_counter))
 
 
 @every_event(event="third_iteration")
 def steps():
+
+    temp = world.space[24][24].vector.temperature
+    print("BEFORE: " + str(temp))
+    converted = convert_from_celsius(temp)
+    print("CONVERTED: " + str(converted))
+    client.send_temperature(converted)
     print("Third iteration done")
 
 
 @every(seconds=2)
 def steps():
-    print("Some task every 2 seconds")
-
+    # print("Some task every 2 seconds")
+    pass
 
 @every(seconds=5)
 def steps():
-    print("I execute every 5 seconds")
+    pass
+    # print("I execute every 5 seconds")
 
 
 @on_event(event="seventh_iteration")
 def steps():
-    print("Seventh_iteration occured")
+    pass
+    # print("Seventh_iteration occured")
 
 
 @after(seconds=11)
@@ -49,7 +60,8 @@ def steps():
 
 @every(start=15, seconds=5)
 def steps():
-    print("Some task after 5 seconds starting at 15 seconds")
+    pass
+    # print("Some task after 5 seconds starting at 15 seconds")
 
 
 sleep(4)

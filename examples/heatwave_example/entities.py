@@ -28,9 +28,9 @@ class World(object):
 
     def transformation(self):
         # heating device
-        gr = np.eye(10) * 2000
+        gr = np.eye(10) * 150
         for iGr in range(10):
-            gr[iGr, -iGr - 1] = 2000
+            gr[iGr, -iGr - 1] = 150
         for k in range(0, 10):
             for j in range(0, 10):
                 point = self.space[k + 20][j + 10]
