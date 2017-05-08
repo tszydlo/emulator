@@ -5,6 +5,7 @@ from queue import Queue
 import numpy as np
 
 from scenario.executor import queues_dictionary, emit_event
+from simulation_entities.world import WorldEntity
 
 
 class MeasurementVector:
@@ -13,7 +14,7 @@ class MeasurementVector:
         self.vector.temperature = 0
 
 
-class World(object):
+class World(WorldEntity):
     PAUSED_EVENT = "world_paused"
     WORLD_PAUSE_EVENT = "world_pause"
     CAN_RESUME = "world_can_resume"
@@ -63,7 +64,7 @@ class World(object):
                     if gr[k, j]:
                         point.vector.temperature = gr[i, j]
 
-    def start_time_transformation(self):
+    def start_transformation(self):
         # TODO: make world initialization
         self.transformation()
         queues_dictionary[World.WORLD_PAUSE_EVENT] = Queue()

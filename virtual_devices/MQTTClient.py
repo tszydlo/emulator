@@ -1,4 +1,4 @@
-from client import mosquitto
+import paho.mqtt.client as paho
 
 
 class LM35_V():
@@ -7,12 +7,16 @@ class LM35_V():
     def __init__(self, dev, adc_pin):
         self.dev = dev
         self.adc_pin = adc_pin
-        self.mqttc = mosquitto.Mosquitto()
+        self.mqttc = paho.Client()
         self.mqttc.on_message = self.on_message
         self.mqttc.on_connect = self.on_connect
         self.mqttc.on_publish = self.on_publish
         self.mqttc.on_subscribe = self.on_subscribe
         self.mqttc.connect("iot.eclipse.org", 1883, 60)
+
+    @staticmethod
+    def convert_from_celsius(t):
+        return int((t / 500.0) * 1023.0)
 
     @staticmethod
     def on_connect(mqttc, obj, rc):

@@ -31,7 +31,7 @@ class Executor:
         self.cond = threading.Condition()
 
     def start(self, world):
-        world.start_time_transformation()
+        world.start_transformation()
         with self.cond:
             self.cond.notifyAll()
 

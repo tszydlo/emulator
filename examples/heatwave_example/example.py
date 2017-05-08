@@ -1,7 +1,6 @@
 from time import sleep
 
-from client import MQTTClient
-from client.converter import convert_from_celsius
+from virtual_devices import MQTTClient
 from examples.heatwave_example.entities import World
 from scenario.executor import after, every_event, every, start_world, emit_event, on_event, queues_dictionary
 
@@ -24,7 +23,7 @@ def steps():
 
     temp = world.space[24][24].vector.temperature
     print("BEFORE: " + str(temp))
-    converted = convert_from_celsius(temp)
+    converted = client.convert_from_celsius(temp)
     print("CONVERTED: " + str(converted))
     client.send_temperature(converted)
     print("Third iteration done")

@@ -10,7 +10,7 @@ class Observer():
         self.world = World()
 
     def start_observing(self):
-        self.world.start_time_transformation()
+        self.world.start_transformation()
 
         fig = plt.figure()
         pcm = plt.pcolormesh(np.array([[self.world.space[j][i].vector.temperature for i in range(self.world.length)]
