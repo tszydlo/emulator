@@ -2,6 +2,7 @@ import collections
 import threading
 from queue import Queue
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from scenario.executor import queues_dictionary, emit_event
@@ -20,56 +21,85 @@ class World(WorldEntity):
     CAN_RESUME = "world_can_resume"
     ITERATION_COMPLETED = "iteration_completed"
 
+
+    class Heater():
+        def __init__(self, max_temperature, size, bottom_left_x, bottom_left_y):
+            self.max_temperature = max_temperature
+            self.size = size
+            self.bottom_left_x = bottom_left_x
+            self.bottom_left_y = bottom_left_y
+            self.grid = np.eye(self.size) * self.max_temperature
+            for iGr in range(self.size):
+                self.grid[iGr, -iGr - 1] = self.max_temperature
+
+
     def __init__(self):
-        self.update_rate = 1
+
+        self.update_rate = 1.0
         self.iteration_counter = 0
         self.length = 50
         self.width = 50
         self.space = [[MeasurementVector() for _ in range(self.length)] for _ in range(self.width)]
+        self.heaters = []
+
+        self.is_heater_map = set()
+
+    def initizalize(self):
+        self.transformation()
+        queues_dictionary[World.WORLD_PAUSE_EVENT] = Queue()
+        queues_dictionary[World.PAUSED_EVENT] = Queue()
+        queues_dictionary[World.CAN_RESUME] = Queue()
+        heater = self.Heater(size=10, max_temperature=150, bottom_left_x=10, bottom_left_y=20)
+
+        self.heaters = [heater]
+
+        self.place_heaters()
+
+    def place_heaters(self):
+        for heater in self.heaters:
+            for i in range(0, heater.size):
+                for j in range(0, heater.size):
+                    point = self.space[i + heater.bottom_left_y][j + heater.bottom_left_x]
+                    if heater.grid[i, j]:
+                        point.vector.temperature = heater.grid[i, j]
+                        self.is_heater_map.add((i + heater.bottom_left_y, j + heater.bottom_left_x))
+
+    def is_heater(self, x, y):
+        for heater in self.heaters:
+            for i in range(0, heater.size):
+                for j in range(0, heater.size):
+                    if x == i + heater.bottom_left_y and y == j + heater.bottom_left_x and heater.grid[i, j]: return True
+        return False
+
 
     def transformation(self):
-        # heating device
-        gr = np.eye(10) * 2000
-        for iGr in range(10):
-            gr[iGr, -iGr - 1] = 2000
-        for i in range(0, 10):
-            for j in range(0, 10):
-                point = self.space[i + 20][j + 10]
-                if gr[i, j]:
-                    point.vector.temperature = gr[i, j]
-        for i in range(0, 10):
-            for j in range(0, 10):
-                point = self.space[i + 20][j + 30]
-                if gr[i, j]:
-                    point.vector.temperature = gr[i, j]
-
-            for j in range(0, self.length):
-                for k in range(0, self.width):
+        for j in range(0, self.length):
+            for k in range(0, self.width):
+                if not (k, j) in self.is_heater_map:
                     upper = None if j == self.length - 1 else self.space[k][j + 1].vector.temperature
                     down = None if j == 0 else self.space[k][j - 1].vector.temperature
                     left = None if k == 0 else self.space[k - 1][j].vector.temperature
                     right = None if k == self.width - 1 else self.space[k + 1][j].vector.temperature
                     elems = [y for y in filter(lambda x: x is not None, (upper, down, left, right))]
-                    self.space[k][j].vector.temperature = sum(elems) / len(elems)
-
-            # Re-assert heaters
-            for k in range(0, 10):
-                for j in range(0, 10):
-                    point = self.space[k + 20][j + 10]
-                    if gr[k, j]:
-                        point.vector.temperature = gr[k, j]
-            for k in range(0, 10):
-                for j in range(0, 10):
-                    point = self.space[k + 20][j + 30]
-                    if gr[k, j]:
-                        point.vector.temperature = gr[k, j]
+                    self.space[k][j].vector.temperature = (sum(elems)) / (len(elems)) * 0.9999
 
     def start_transformation(self):
-        # TODO: make world initialization
-        self.transformation()
-        queues_dictionary[World.WORLD_PAUSE_EVENT] = Queue()
-        queues_dictionary[World.PAUSED_EVENT] = Queue()
-        queues_dictionary[World.CAN_RESUME] = Queue()
+
+        # while True:
+        #     if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
+        #         emit_event(World.PAUSED_EVENT)
+        #         queues_dictionary[World.WORLD_PAUSE_EVENT].get()
+        #         queues_dictionary[World.CAN_RESUME].get(block=True)
+        #         print("WORLD RESUMED\n")
+        #     self.transformation()
+        #     self.iteration_counter += 1
+        #
+        #     if self.iteration_counter % 50 == 0:
+        #         self.plot_itself_to_file(self.iteration_counter)
+        #
+        #     emit_event(World.ITERATION_COMPLETED)
+
+
 
         def transform_each_seconds():
             if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
@@ -79,7 +109,19 @@ class World(WorldEntity):
                 print("WORLD RESUMED\n")
             self.transformation()
             self.iteration_counter += 1
+
             emit_event(World.ITERATION_COMPLETED)
             threading.Timer(self.update_rate, transform_each_seconds).start()
 
         transform_each_seconds()
+
+    def plot_itself_to_file(self, i):
+        plt.figure()
+        plt.pcolormesh(np.array([[self.space[j][i].vector.temperature for i in range(self.length)]
+                                       for j in range(self.width)]), cmap='jet', vmin=0, vmax=150)
+        plt.colorbar()
+
+        file_name = '../../plots/plot' + str(i) + '.png'
+        plt.savefig(file_name)
+        plt.close()
+

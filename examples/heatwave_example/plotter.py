@@ -20,7 +20,7 @@ class Plotter():
                                     for j in range(self.world.width)]).ravel())
             plt.draw()
 
-        anim = FuncAnimation(fig, step, interval=1000)
+        anim = FuncAnimation(fig, step, interval=100)
         plt.show()
 
 if __name__ == '__main__':
