@@ -21,7 +21,7 @@ class World(WorldEntity):
     ITERATION_COMPLETED = "iteration_completed"
 
     def __init__(self):
-        self.update_rate = 0.5
+        self.update_rate = 1
         self.iteration_counter = 0
         self.length = 50
         self.width = 50
@@ -29,40 +29,40 @@ class World(WorldEntity):
 
     def transformation(self):
         # heating device
-        gr = np.eye(10) * 150
+        gr = np.eye(10) * 2000
         for iGr in range(10):
-            gr[iGr, -iGr - 1] = 150
-        for k in range(0, 10):
+            gr[iGr, -iGr - 1] = 2000
+        for i in range(0, 10):
             for j in range(0, 10):
-                point = self.space[k + 20][j + 10]
-                if gr[k, j]:
-                    point.vector.temperature = gr[k, j]
-        for k in range(0, 10):
+                point = self.space[i + 20][j + 10]
+                if gr[i, j]:
+                    point.vector.temperature = gr[i, j]
+        for i in range(0, 10):
             for j in range(0, 10):
-                point = self.space[k + 20][j + 30]
-                if gr[k, j]:
-                    point.vector.temperature = gr[k, j]
+                point = self.space[i + 20][j + 30]
+                if gr[i, j]:
+                    point.vector.temperature = gr[i, j]
 
             for j in range(0, self.length):
-                for m in range(0, self.width):
-                    upper = None if j == self.length - 1 else self.space[m][j + 1].vector.temperature
-                    down = None if j == 0 else self.space[m][j - 1].vector.temperature
-                    left = None if m == 0 else self.space[m - 1][j].vector.temperature
-                    right = None if m == self.width - 1 else self.space[m + 1][j].vector.temperature
+                for k in range(0, self.width):
+                    upper = None if j == self.length - 1 else self.space[k][j + 1].vector.temperature
+                    down = None if j == 0 else self.space[k][j - 1].vector.temperature
+                    left = None if k == 0 else self.space[k - 1][j].vector.temperature
+                    right = None if k == self.width - 1 else self.space[k + 1][j].vector.temperature
                     elems = [y for y in filter(lambda x: x is not None, (upper, down, left, right))]
-                    self.space[m][j].vector.temperature = sum(elems) / len(elems)
+                    self.space[k][j].vector.temperature = sum(elems) / len(elems)
 
             # Re-assert heaters
-            for i in range(0, 10):
+            for k in range(0, 10):
                 for j in range(0, 10):
-                    point = self.space[i + 20][j + 10]
+                    point = self.space[k + 20][j + 10]
                     if gr[k, j]:
-                        point.vector.temperature = gr[i, j]
-            for i in range(0, 10):
+                        point.vector.temperature = gr[k, j]
+            for k in range(0, 10):
                 for j in range(0, 10):
-                    point = self.space[i + 20][j + 30]
+                    point = self.space[k + 20][j + 30]
                     if gr[k, j]:
-                        point.vector.temperature = gr[i, j]
+                        point.vector.temperature = gr[k, j]
 
     def start_transformation(self):
         # TODO: make world initialization
