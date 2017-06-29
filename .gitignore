@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/
+examples/__pycache__/
+examples/heatwave_example/__pycache__/
+plots/
+scenario/__pycache__/
+simulation_entities/__pycache__/

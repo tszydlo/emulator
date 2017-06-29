@@ -47,9 +47,8 @@ def parametrized(decorator):
 
 @parametrized
 def after(steps_fun, **kwargs):
-    if steps_fun.__name__ == "steps":
-        ConditionalTimer(kwargs[SECONDS_KEY], steps_fun, executor.cond).start()
-        return steps_fun
+    ConditionalTimer(kwargs[SECONDS_KEY], steps_fun, executor.cond).start()
+    return steps_fun
 
 
 @parametrized
@@ -63,13 +62,13 @@ def every(steps_fun, *args, **kwargs):
         kwargs[STEPS_FUN_KEY] = steps_fun
         Timer(kwargs[SECONDS_KEY], execute_repeatedly, args, kwargs).start()
 
-    if steps_fun.__name__ == "steps":
-        start_time = 0
-        if "start" in kwargs.keys():
-            start_time = kwargs[START_TIME_KEY]
-        kwargs[STEPS_FUN_KEY] = steps_fun
-        ConditionalTimer(start_time, execute_repeatedly, executor.cond, args, kwargs).start()
-        return steps_fun
+
+    start_time = 0
+    if "start" in kwargs.keys():
+        start_time = kwargs[START_TIME_KEY]
+    kwargs[STEPS_FUN_KEY] = steps_fun
+    ConditionalTimer(start_time, execute_repeatedly, executor.cond, args, kwargs).start()
+    return steps_fun
 
 
 @parametrized
@@ -79,12 +78,12 @@ def every_event(steps_fun, *args, **kwargs):
             queues_dictionary[kwargs["event"]].get(block=True)
             steps_fun()
 
-    if steps_fun.__name__ == "steps":
-        event_name = kwargs["event"]
-        if event_name not in queues_dictionary.keys():
-            queues_dictionary[event_name] = Queue()
-        threading.Thread(target=execute, args=()).start()
-        return steps_fun
+
+    event_name = kwargs["event"]
+    if event_name not in queues_dictionary.keys():
+        queues_dictionary[event_name] = Queue()
+    threading.Thread(target=execute, args=()).start()
+    return steps_fun
 
 
 @parametrized
@@ -93,12 +92,11 @@ def on_event(steps_fun, **kwargs):
         queues_dictionary[event_name].get(block=True)
         steps_fun()
 
-    if steps_fun.__name__ == "steps":
-        event_name = kwargs["event"]
-        if event_name not in queues_dictionary.keys():
-            queues_dictionary[event_name] = Queue()
-        threading.Thread(target=execute, args=()).start()
-        return steps_fun
+    event_name = kwargs["event"]
+    if event_name not in queues_dictionary.keys():
+        queues_dictionary[event_name] = Queue()
+    threading.Thread(target=execute, args=()).start()
+    return steps_fun
 
 
 def start_world(world):

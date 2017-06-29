@@ -8,7 +8,6 @@ import numpy as np
 from scenario.executor import queues_dictionary, emit_event
 from simulation_entities.world import WorldEntity
 
-
 class MeasurementVector:
     def __init__(self):
         self.vector = collections.namedtuple("TemperatureVector", ['temperature'])
@@ -34,7 +33,6 @@ class World(WorldEntity):
 
 
     def __init__(self):
-
         self.update_rate = 1.0
         self.iteration_counter = 0
         self.length = 50
@@ -55,6 +53,8 @@ class World(WorldEntity):
 
         self.place_heaters()
 
+        plt.figure(1)
+
     def place_heaters(self):
         for heater in self.heaters:
             for i in range(0, heater.size):
@@ -73,6 +73,7 @@ class World(WorldEntity):
 
 
     def transformation(self):
+
         for j in range(0, self.length):
             for k in range(0, self.width):
                 if not (k, j) in self.is_heater_map:
@@ -85,23 +86,7 @@ class World(WorldEntity):
 
     def start_transformation(self):
 
-        # while True:
-        #     if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
-        #         emit_event(World.PAUSED_EVENT)
-        #         queues_dictionary[World.WORLD_PAUSE_EVENT].get()
-        #         queues_dictionary[World.CAN_RESUME].get(block=True)
-        #         print("WORLD RESUMED\n")
-        #     self.transformation()
-        #     self.iteration_counter += 1
-        #
-        #     if self.iteration_counter % 50 == 0:
-        #         self.plot_itself_to_file(self.iteration_counter)
-        #
-        #     emit_event(World.ITERATION_COMPLETED)
-
-
-
-        def transform_each_seconds():
+        while True:
             if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
                 emit_event(World.PAUSED_EVENT)
                 queues_dictionary[World.WORLD_PAUSE_EVENT].get()
@@ -110,18 +95,52 @@ class World(WorldEntity):
             self.transformation()
             self.iteration_counter += 1
 
-            emit_event(World.ITERATION_COMPLETED)
-            threading.Timer(self.update_rate, transform_each_seconds).start()
+            if self.iteration_counter % 50 == 0:
+                self.plot_itself_to_file(self.iteration_counter)
 
-        transform_each_seconds()
+            emit_event(World.ITERATION_COMPLETED)
+
+
+
+        # def transform_each_seconds():
+        #
+        #
+        #     if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
+        #         emit_event(World.PAUSED_EVENT)
+        #         queues_dictionary[World.WORLD_PAUSE_EVENT].get()
+        #         queues_dictionary[World.CAN_RESUME].get(block=True)
+        #         print("WORLD RESUMED\n")
+        #     self.transformation()
+        #     self.iteration_counter += 1
+        #
+        #     emit_event(World.ITERATION_COMPLETED)
+        #     threading.Timer(self.update_rate, transform_each_seconds).start()
+        #
+        # transform_each_seconds()
 
     def plot_itself_to_file(self, i):
-        plt.figure()
+
+        if i == 50:
+            ax = plt.subplot(221)
+            ax.set_title("After 50 iterations")
+        elif i == 150:
+            ax = plt.subplot(222)
+            ax.set_title("After 150 iterations")
+        elif i ==300:
+            ax = plt.subplot(223)
+            ax.set_title("After 300 iterations")
+        elif i == 350:
+            ax = plt.subplot(224)
+            ax.set_title("After 350 iterations")
+        else: return
+
         plt.pcolormesh(np.array([[self.space[j][i].vector.temperature for i in range(self.length)]
                                        for j in range(self.width)]), cmap='jet', vmin=0, vmax=150)
         plt.colorbar()
 
-        file_name = '../../plots/plot' + str(i) + '.png'
-        plt.savefig(file_name)
-        plt.close()
+        if i == 350:
+            file_name = '../../plots/merged' + '.png'
+            plt.tight_layout()
+            plt.savefig(file_name)
+            plt.close()
 
