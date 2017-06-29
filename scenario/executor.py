@@ -1,3 +1,4 @@
+import time
 import threading
 from threading import Timer
 from queue import Queue
@@ -29,21 +30,28 @@ class ConditionalTimer(threading.Timer):
 class Executor:
     def __init__(self):
         self.cond = threading.Condition()
+        self.start_time = time.time()
 
-    def start(self, world):
-        world.initizalize()
-        world.start_transformation()
+    def start(self):
         with self.cond:
             self.cond.notifyAll()
 
+    def get_time(self):
+        return time.time() - self.start_time
+
+
 executor = Executor()
+
 
 def parametrized(decorator):
     def layer(*args, **kwargs):
         def wrapper(f):
             return decorator(f, *args, **kwargs)
+
         return wrapper
+
     return layer
+
 
 @parametrized
 def after(steps_fun, **kwargs):
@@ -99,5 +107,5 @@ def on_event(steps_fun, **kwargs):
     return steps_fun
 
 
-def start_world(world):
-    executor.start(world)
+def start_executing():
+    executor.start()

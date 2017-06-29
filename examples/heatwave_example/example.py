@@ -1,14 +1,14 @@
 from time import sleep
 
-from virtual_devices import MQTTClient
+#from virtual_devices import MQTTClient
 from examples.heatwave_example.entities import World
-from scenario.executor import after, every_event, every, start_world, emit_event, on_event, queues_dictionary
+from scenario.executor import after, every_event, every, start_executing, emit_event, on_event, queues_dictionary
 import matplotlib.pyplot as plt
 import numpy as np
 
 world = World()
-client1 = MQTTClient.LM35_V(1, 0, (25, 20), world)
-client2 = MQTTClient.LM35_V(2, 0, (25, 30), world)
+#client1 = MQTTClient.LM35_V(1, 0, (25, 20), world)
+#client2 = MQTTClient.LM35_V(2, 0, (25, 30), world)
 
 
 
@@ -59,4 +59,4 @@ def steps():
 
 # sleep(4)
 if __name__ == '__main__':
-    start_world(world)
+    start_executing(world)
