@@ -1,12 +1,12 @@
 import collections
-import threading
 from queue import Queue
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from scenario.executor import queues_dictionary, emit_event
+from emulator.executor import queues_dictionary, emit_event
 from simulation_entities.world import WorldEntity
+
 
 class MeasurementVector:
     def __init__(self):
@@ -68,7 +68,9 @@ class World(WorldEntity):
         for heater in self.heaters:
             for i in range(0, heater.size):
                 for j in range(0, heater.size):
-                    if x == i + heater.bottom_left_y and y == j + heater.bottom_left_x and heater.grid[i, j]: return True
+                    if x == i + heater.bottom_left_y and y == j + heater.bottom_left_x and heater.grid[
+                        i, j]:
+                        return True
         return False
 
 
@@ -102,21 +104,21 @@ class World(WorldEntity):
 
 
 
-        # def transform_each_seconds():
-        #
-        #
-        #     if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
-        #         emit_event(World.PAUSED_EVENT)
-        #         queues_dictionary[World.WORLD_PAUSE_EVENT].get()
-        #         queues_dictionary[World.CAN_RESUME].get(block=True)
-        #         print("WORLD RESUMED\n")
-        #     self.transformation()
-        #     self.iteration_counter += 1
-        #
-        #     emit_event(World.ITERATION_COMPLETED)
-        #     threading.Timer(self.update_rate, transform_each_seconds).start()
-        #
-        # transform_each_seconds()
+            # def transform_each_seconds():
+            #
+            #
+            # if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
+            # emit_event(World.PAUSED_EVENT)
+            #         queues_dictionary[World.WORLD_PAUSE_EVENT].get()
+            #         queues_dictionary[World.CAN_RESUME].get(block=True)
+            #         print("WORLD RESUMED\n")
+            #     self.transformation()
+            #     self.iteration_counter += 1
+            #
+            #     emit_event(World.ITERATION_COMPLETED)
+            #     threading.Timer(self.update_rate, transform_each_seconds).start()
+            #
+            # transform_each_seconds()
 
     def plot_itself_to_file(self, i):
 
@@ -126,16 +128,17 @@ class World(WorldEntity):
         elif i == 150:
             ax = plt.subplot(222)
             ax.set_title("After 150 iterations")
-        elif i ==300:
+        elif i == 300:
             ax = plt.subplot(223)
             ax.set_title("After 300 iterations")
         elif i == 350:
             ax = plt.subplot(224)
             ax.set_title("After 350 iterations")
-        else: return
+        else:
+            return
 
         plt.pcolormesh(np.array([[self.space[j][i].vector.temperature for i in range(self.length)]
-                                       for j in range(self.width)]), cmap='jet', vmin=0, vmax=150)
+                                 for j in range(self.width)]), cmap='jet', vmin=0, vmax=150)
         plt.colorbar()
 
         if i == 350:

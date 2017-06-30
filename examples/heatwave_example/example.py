@@ -2,7 +2,7 @@ from time import sleep
 
 #from virtual_devices import MQTTClient
 from examples.heatwave_example.entities import World
-from scenario.executor import after, every_event, every, start_executing, emit_event, on_event, queues_dictionary
+from emulator.executor import after, every_event, every, start_executing, emit_event, on_event, queues_dictionary
 import matplotlib.pyplot as plt
 import numpy as np
 
