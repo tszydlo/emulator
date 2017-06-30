@@ -1,20 +1,15 @@
 import paho.mqtt.client as paho
 
 
-class LM35_V():
-    device_topic = "fogdevicesplatform/fog_device_%d/slave/ADC/%d"
+class MQTTClient():
 
-    def __init__(self, dev, adc_pin, position, world):
-        self.position = position
-        self.world = world
-        self.dev = dev
-        self.adc_pin = adc_pin
+    def __init__(self, broker_host):
         self.mqttc = paho.Client()
         self.mqttc.on_message = self.on_message
         self.mqttc.on_connect = self.on_connect
         self.mqttc.on_publish = self.on_publish
         self.mqttc.on_subscribe = self.on_subscribe
-        self.mqttc.connect("iot.eclipse.org", 1883, 60)
+        self.mqttc.connect(broker_host, 1883, 60)
 
     @staticmethod
     def convert_from_celsius(t):
@@ -39,9 +34,3 @@ class LM35_V():
     @staticmethod
     def on_log(self, mqttc, obj, level, string):
         print(string)
-
-    def send_temperature(self, temp_value):
-        self.mqttc.publish(self.device_topic % (self.dev, self.adc_pin), temp_value, 0, True)
-
-    def get_temperature(self):
-        return self.world.space[self.position[0]][self.position[1]].vector.temperature

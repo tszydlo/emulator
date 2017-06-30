@@ -59,4 +59,4 @@ def steps():
 
 # sleep(4)
 if __name__ == '__main__':
-    start_executing(world)
+    start_executing()

@@ -27,6 +27,9 @@ from scenario.executor import every, executor, start_executing
 #     global time3
 #     time3 = time.time()
 #     pass
+from virtual_devices.MQTTClient import MQTTClient
+from virtual_devices.virtual_sensors import LM35_V
+
 
 @every(start=1, seconds=1)
 def generator_step():
@@ -39,8 +42,10 @@ def generator_step():
 if __name__ == '__main__':
     start_executing()
 
-    #sensor1 = LM35_V(1, 0)
-    #sensor2 = LM35_V(2, 0)
+    client1 = MQTTClient("iot.eclipse.org")
 
-    #client1 = MQTTClient(broker_host)
+    sensor1 = LM35_V(1, 0, client1)
+    sensor2 = LM35_V(2, 0, client1)
+
+
 
