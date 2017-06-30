@@ -2,6 +2,7 @@ import time
 import threading
 from threading import Timer
 from queue import Queue
+from paho.mqtt.client import  topic_matches_sub
 
 STEPS_FUN_KEY = "steps_fun"
 SECONDS_KEY = "seconds"
@@ -78,18 +79,19 @@ def every(steps_fun, *args, **kwargs):
     ConditionalTimer(start_time, execute_repeatedly, executor.cond, args, kwargs).start()
     return steps_fun
 
-
 @parametrized
 def every_event(steps_fun, *args, **kwargs):
     def execute():
         while True:
-            queues_dictionary[kwargs["event"]].get(block=True)
-            steps_fun()
+            event_pattern = kwargs["event"]
 
+            for event_name in list(queues_dictionary):
+                if topic_matches_sub(event_pattern, event_name):
+                    queues_dictionary[event_name].get(block=True)
+                    steps_fun(event_name)
 
-    event_name = kwargs["event"]
-    if event_name not in queues_dictionary.keys():
-        queues_dictionary[event_name] = Queue()
+    # if event_name not in queues_dictionary.keys():
+    #     queues_dictionary[event_name] = Queue()
     threading.Thread(target=execute, args=()).start()
     return steps_fun
 

@@ -1,3 +1,6 @@
+from emulator.executor import emit_event
+
+
 class LED_V():
     device_topic = "fogdevicesplatform/fog_device_%d/slave/GPIO/%d"
 
@@ -10,9 +13,8 @@ class LED_V():
 
         self.mqtt_client.register(self.device_topic, self.listener)
 
-
     def listener(self):
-        pass
+        emit_event(self.device_topic)
 
     def get_state_v(self):
         return self.state
