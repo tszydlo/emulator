@@ -11,7 +11,7 @@ led3 = LED_V(1, 2, client1, "led/event/3")
 leds = {"led/event/1": led1, "led/event/2": led2, "led/event/3": led3}
 
 
-# scenario psawning events for testing purposes
+# scenario spawning events for testing purposes
 # @every(seconds=2)
 # def steps():
 #     print("EVENT 3 emited")

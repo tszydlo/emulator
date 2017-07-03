@@ -5,7 +5,7 @@ class MQTTClient():
 
     def __init__(self, broker_host):
         self.callbacks_register = {}
-        self.mqttc = paho.Client()
+        self.mqttc = paho.Client("", True, None, paho.MQTTv31)
         self.mqttc.on_message = self.on_message
         self.mqttc.on_connect = self.on_connect
         self.mqttc.on_publish = self.on_publish
@@ -16,7 +16,7 @@ class MQTTClient():
         self.callbacks_register[device_topic] = callback
 
     @staticmethod
-    def on_connect(mqttc, obj, rc):
+    def on_connect(mqttc, obj, flags, rc):
         print("rc: " + str(rc))
 
     def on_message(self, mqttc, obj, msg):
@@ -30,5 +30,6 @@ class MQTTClient():
 
     @staticmethod
     def on_subscribe(mqttc, obj, mid, granted_qos):
+        print("Connected")
         print("Subscribed: " + str(mid) + " " + str(granted_qos))
 
