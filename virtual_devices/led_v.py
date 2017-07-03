@@ -11,10 +11,13 @@ class LED_V():
         self.state = 0
         self.mqtt_client = mqtt_client
 
-        self.mqtt_client.register(self.event, self.listener)
+        self.mqtt_client.register(self.device_topic % (self.dev, self.adc_pin), self.listener)
 
-    def listener(self):
-        emit_event(self.device_topic)
+    def listener(self,msg):
+        #print("message is -> "+str(msg.payload))
+        emit_event(self.event)
+        #print("event is -> "+ self.event)
+        self.state = int(msg.payload)
 
     def get_state_v(self):
         return self.state

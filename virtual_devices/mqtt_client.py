@@ -11,8 +11,10 @@ class MQTTClient():
         self.mqttc.on_publish = self.on_publish
         self.mqttc.on_subscribe = self.on_subscribe
         self.mqttc.connect(broker_host, 1883, 60)
+        self.mqttc.loop_start()
 
     def register(self, device_topic, callback):
+        self.mqttc.subscribe(device_topic)
         self.callbacks_register[device_topic] = callback
 
     @staticmethod
@@ -21,7 +23,7 @@ class MQTTClient():
 
     def on_message(self, mqttc, obj, msg):
         if msg.topic in self.callbacks_register.keys():
-            self.callbacks_register[msg.topic]()
+            self.callbacks_register[msg.topic](msg)
         print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
     @staticmethod

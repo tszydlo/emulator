@@ -3,6 +3,7 @@ from virtual_devices.mqtt_client import MQTTClient
 from virtual_devices.switch_v import Switch_V, SwitchState
 
 client1 = MQTTClient("149.156.100.177")
+#client1 = MQTTClient("iot.eclipse.org")
 switch1 = Switch_V(2, 3, client1)
 
 
