@@ -1,4 +1,4 @@
-from emulator.executor import emit_event
+from scenario_engine.executor import emit_event
 
 
 class LED_V():

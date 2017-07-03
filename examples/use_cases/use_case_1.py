@@ -1,8 +1,8 @@
 import math
 
-from emulator.executor import every, executor, start_executing
+from scenario_engine.executor import every, executor, start_executing
 from virtual_devices.lm35_v import LM35_V
-from virtual_devices.mqtt_client import MQTTClient
+from mqtt.mqtt_client import MQTTClient
 
 
 client1 = MQTTClient("149.156.100.177")
@@ -19,8 +19,3 @@ def generator_step():
 
 if __name__ == '__main__':
     start_executing()
-
-
-
-
-

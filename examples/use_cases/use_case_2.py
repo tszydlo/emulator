@@ -1,5 +1,5 @@
-from emulator.executor import every, start_executing
-from virtual_devices.mqtt_client import MQTTClient
+from scenario_engine.executor import every, start_executing
+from mqtt.mqtt_client import MQTTClient
 from virtual_devices.switch_v import Switch_V, SwitchState
 
 client1 = MQTTClient("149.156.100.177")

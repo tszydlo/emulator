@@ -1,6 +1,6 @@
-from emulator.executor import start_executing, every_event
+from scenario_engine.executor import start_executing, every_event
 from virtual_devices.led_v import LED_V
-from virtual_devices.mqtt_client import MQTTClient
+from mqtt.mqtt_client import MQTTClient
 
 client1 = MQTTClient("127.0.0.1")
 # client1 = MQTTClient("149.156.100.177")

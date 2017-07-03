@@ -4,8 +4,7 @@ from queue import Queue
 import matplotlib.pyplot as plt
 import numpy as np
 
-from emulator.executor import queues_dictionary, emit_event
-from simulation_entities.world import WorldEntity
+from scenario_engine.executor import queues_dictionary, emit_event
 
 
 class MeasurementVector:
@@ -14,7 +13,7 @@ class MeasurementVector:
         self.vector.temperature = 0
 
 
-class World(WorldEntity):
+class TempSimulation2DWorld():
     PAUSED_EVENT = "world_paused"
     WORLD_PAUSE_EVENT = "world_pause"
     CAN_RESUME = "world_can_resume"
@@ -44,9 +43,9 @@ class World(WorldEntity):
 
     def initizalize(self):
         self.transformation()
-        queues_dictionary[World.WORLD_PAUSE_EVENT] = Queue()
-        queues_dictionary[World.PAUSED_EVENT] = Queue()
-        queues_dictionary[World.CAN_RESUME] = Queue()
+        queues_dictionary[TempSimulation2DWorld.WORLD_PAUSE_EVENT] = Queue()
+        queues_dictionary[TempSimulation2DWorld.PAUSED_EVENT] = Queue()
+        queues_dictionary[TempSimulation2DWorld.CAN_RESUME] = Queue()
         heater = self.Heater(size=10, max_temperature=150, bottom_left_x=10, bottom_left_y=20)
 
         self.heaters = [heater]
@@ -87,20 +86,20 @@ class World(WorldEntity):
                     self.space[k][j].vector.temperature = (sum(elems)) / (len(elems)) * 0.9999
 
     def start_transformation(self):
-
+        queues_dictionary[TempSimulation2DWorld.WORLD_PAUSE_EVENT] = Queue()
         while True:
-            if not queues_dictionary[World.WORLD_PAUSE_EVENT].empty():
-                emit_event(World.PAUSED_EVENT)
-                queues_dictionary[World.WORLD_PAUSE_EVENT].get()
-                queues_dictionary[World.CAN_RESUME].get(block=True)
+            if not queues_dictionary[TempSimulation2DWorld.WORLD_PAUSE_EVENT].empty():
+                emit_event(TempSimulation2DWorld.PAUSED_EVENT)
+                queues_dictionary[TempSimulation2DWorld.WORLD_PAUSE_EVENT].get()
+                queues_dictionary[TempSimulation2DWorld.CAN_RESUME].get(block=True)
                 print("WORLD RESUMED\n")
             self.transformation()
             self.iteration_counter += 1
 
-            if self.iteration_counter % 50 == 0:
-                self.plot_itself_to_file(self.iteration_counter)
+            # if self.iteration_counter % 50 == 0:
+            #     self.plot_itself_to_file(self.iteration_counter)
 
-            emit_event(World.ITERATION_COMPLETED)
+            emit_event(TempSimulation2DWorld.ITERATION_COMPLETED)
 
 
 

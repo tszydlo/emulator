@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
-from examples.heatwave_example.entities import World
+from simulation_entities.temp_simulation_2d_world import TempSimulation2DWorld
 
 
 class Plotter():
@@ -24,7 +24,7 @@ class Plotter():
         plt.show()
 
 if __name__ == '__main__':
-    world = World()
+    world = TempSimulation2DWorld()
     plotter = Plotter(world)
     plotter.world.start_transformation()
     plotter.start_observing()
