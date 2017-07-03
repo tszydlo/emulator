@@ -1,18 +1,18 @@
 from time import sleep
 
-from virtual_devices import MQTTClient
-from examples.heatwave_example.entities import World
-from scenario.executor import after, every_event, every, start_world, emit_event, on_event, queues_dictionary
+#from virtual_devices import MQTTClient
+from scenario_engine.executor import after, every_event, every, start_executing, emit_event, on_event, queues_dictionary
 import matplotlib.pyplot as plt
 import numpy as np
+from simulation_entities.temp_simulation_2d_world import TempSimulation2DWorld
 
-world = World()
-client1 = MQTTClient.LM35_V(1, 0, (25, 20), world)
-client2 = MQTTClient.LM35_V(2, 0, (25, 30), world)
+world = TempSimulation2DWorld()
+#client1 = MQTTClient.LM35_V(1, 0, (25, 20), world)
+#client2 = MQTTClient.LM35_V(2, 0, (25, 30), world)
 
 
 
-@every_event(event=World.ITERATION_COMPLETED)
+@every_event(event=TempSimulation2DWorld.ITERATION_COMPLETED)
 def function1():
     iteration = world.iteration_counter
     if iteration == 101:
@@ -36,7 +36,7 @@ def function1():
 @on_event(event="hundred_reached")
 def function3():
     print("Heater added")
-    heater1 = World.Heater(size=10, max_temperature=150, bottom_left_x=30, bottom_left_y=20)
+    heater1 = TempSimulation2DWorld.Heater(size=10, max_temperature=150, bottom_left_x=30, bottom_left_y=20)
     world.heaters.append(heater1)
     world.place_heaters()
 
@@ -50,13 +50,13 @@ def function4():
 @after(seconds=11)
 def steps():
     print("\nI execute after 11 seconds - I BLOCK WORLD")
-    emit_event(World.WORLD_PAUSE_EVENT)
-    queues_dictionary[World.PAUSED_EVENT].get(block=True)
+    emit_event(TempSimulation2DWorld.WORLD_PAUSE_EVENT)
+    queues_dictionary[TempSimulation2DWorld.PAUSED_EVENT].get(block=True)
     print("WORLD HAS PAUSED\n")
     print(world.space[24][24].vector.temperature)
     sleep(10)
-    emit_event(World.CAN_RESUME)
+    emit_event(TempSimulation2DWorld.CAN_RESUME)
 
 # sleep(4)
 if __name__ == '__main__':
-    start_world(world)
+    start_executing()

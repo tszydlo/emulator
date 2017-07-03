@@ -1,6 +1,8 @@
+import time
 import threading
 from threading import Timer
 from queue import Queue
+from paho.mqtt.client import topic_matches_sub
 
 STEPS_FUN_KEY = "steps_fun"
 SECONDS_KEY = "seconds"
@@ -29,21 +31,28 @@ class ConditionalTimer(threading.Timer):
 class Executor:
     def __init__(self):
         self.cond = threading.Condition()
+        self.start_time = time.time()
 
-    def start(self, world):
-        world.initizalize()
-        world.start_transformation()
+    def start(self):
         with self.cond:
             self.cond.notifyAll()
 
+    def get_time(self):
+        return time.time() - self.start_time
+
+
 executor = Executor()
+
 
 def parametrized(decorator):
     def layer(*args, **kwargs):
         def wrapper(f):
             return decorator(f, *args, **kwargs)
+
         return wrapper
+
     return layer
+
 
 @parametrized
 def after(steps_fun, **kwargs):
@@ -62,7 +71,6 @@ def every(steps_fun, *args, **kwargs):
         kwargs[STEPS_FUN_KEY] = steps_fun
         Timer(kwargs[SECONDS_KEY], execute_repeatedly, args, kwargs).start()
 
-
     start_time = 0
     if "start" in kwargs.keys():
         start_time = kwargs[START_TIME_KEY]
@@ -75,13 +83,15 @@ def every(steps_fun, *args, **kwargs):
 def every_event(steps_fun, *args, **kwargs):
     def execute():
         while True:
-            queues_dictionary[kwargs["event"]].get(block=True)
-            steps_fun()
+            event_pattern = kwargs["event"]
 
+            for event_name in list(queues_dictionary):
+                if topic_matches_sub(event_pattern, event_name):
+                    queues_dictionary[event_name].get(block=True)
+                    steps_fun(event_name)
 
-    event_name = kwargs["event"]
-    if event_name not in queues_dictionary.keys():
-        queues_dictionary[event_name] = Queue()
+    # if event_name not in queues_dictionary.keys():
+    #     queues_dictionary[event_name] = Queue()
     threading.Thread(target=execute, args=()).start()
     return steps_fun
 
@@ -99,5 +109,5 @@ def on_event(steps_fun, **kwargs):
     return steps_fun
 
 
-def start_world(world):
-    executor.start(world)
+def start_executing():
+    executor.start()
