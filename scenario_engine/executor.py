@@ -12,9 +12,10 @@ queues_dictionary = {}
 
 
 def emit_event(event_name):
-    if event_name not in queues_dictionary.keys():
-        queues_dictionary[event_name] = Queue()
-    queues_dictionary[event_name].put(1)
+
+    for event_pattern in list(queues_dictionary):
+        if topic_matches_sub(event_pattern, event_name):
+            queues_dictionary[event_pattern].put(event_name)
 
 
 class ConditionalTimer(threading.Timer):
@@ -83,15 +84,12 @@ def every(steps_fun, *args, **kwargs):
 def every_event(steps_fun, *args, **kwargs):
     def execute():
         while True:
-            event_pattern = kwargs["event"]
+            event_name = queues_dictionary[event_pattern].get(block=True)
+            steps_fun(event_name)
 
-            for event_name in list(queues_dictionary):
-                if topic_matches_sub(event_pattern, event_name):
-                    queues_dictionary[event_name].get(block=True)
-                    steps_fun(event_name)
-
-    # if event_name not in queues_dictionary.keys():
-    #     queues_dictionary[event_name] = Queue()
+    event_pattern = kwargs["event"]
+    if event_pattern not in queues_dictionary.keys():
+        queues_dictionary[event_pattern] = Queue()
     threading.Thread(target=execute, args=()).start()
     return steps_fun
 
@@ -99,12 +97,12 @@ def every_event(steps_fun, *args, **kwargs):
 @parametrized
 def on_event(steps_fun, **kwargs):
     def execute():
-        queues_dictionary[event_name].get(block=True)
-        steps_fun()
+        event_name = queues_dictionary[event_pattern].get(block=True)
+        steps_fun(event_name)
 
-    event_name = kwargs["event"]
-    if event_name not in queues_dictionary.keys():
-        queues_dictionary[event_name] = Queue()
+    event_pattern = kwargs["event"]
+    if event_pattern not in queues_dictionary.keys():
+        queues_dictionary[event_pattern] = Queue()
     threading.Thread(target=execute, args=()).start()
     return steps_fun
 
