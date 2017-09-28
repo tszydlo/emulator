@@ -14,7 +14,7 @@ queues_dictionary = {}
 
 def emit_event(event_name):
     """
-    Puts event to all queues in queues_dictionary with matching regular expression.
+    Puts event to all queues in queues_dictionary with matching MQTT topic pattern.
 
     :param event_name: string representing the name of event to be matched with queues.
     """
@@ -121,7 +121,7 @@ def every(steps_fun, *args, **kwargs):
 
 
 @parametrized
-def every_event(steps_fun, *args, **kwargs):
+def every_event(steps_fun, **kwargs):
     """
     Decorator which executes function on each occurrence of event.
     Recognized kwargs:

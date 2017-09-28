@@ -22,8 +22,14 @@ sensor1 = LM35_V(1, 0, client1)
 # simulation models
 world = TempSimulation2DWorld()
 
+"""
+Example shows heatwave diffusion model on 2D plate. Heat wave is being propagated from heaters placed on plate which 
+can be added or removed by emiting corresponding corresponding events triggered by virtual led change of state. 
+Temperature in the middle of plate is read by observer after each completed iteration and then send to virtual LM35
+sensor. In the meantime, each 5 seonds, the whole surface with temperature values is plotted to files.   
+"""
 
-# actual scenario
+
 @every_event(event=TempSimulation2DWorld.ITERATION_COMPLETED)
 def temp_update(event):
     sensor1.set_temp_v(world.space[24][24].vector.temperature)
@@ -38,7 +44,7 @@ def heater_state_notification(event):
         world.place_heaters()
         print("heater added")
     else:
-        print("heater removed")
+        print("heaters removed")
         world.heaters.clear()
         world.is_heater_map.clear()
 
