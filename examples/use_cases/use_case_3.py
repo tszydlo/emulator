@@ -1,31 +1,39 @@
 from pynput import keyboard
 
 from mqtt.mqtt_client import MQTTClient
-from virtual_devices.switch_v import Switch_V, SwitchState
+from virtual_devices.button_v import ButtonV, ButtonState
 
-client1 = MQTTClient("149.156.100.177")
-switch1 = Switch_V(2, 3, client1)
-switch2 = Switch_V(2, 4, client1)
-switch3 = Switch_V(2, 5, client1)
+client1 = MQTTClient("fogdevices.agh.edu.pl")
+button_1 = ButtonV(2, 3, client1)
+button_2 = ButtonV(2, 4, client1)
+button_3 = ButtonV(2, 5, client1)
 
-switches = [switch1, switch2, switch3]
+buttons = [button_1, button_2, button_3]
 
-#TODO: test it and fix
+"""
+Example shows simple simulation of button pressing/releasing in reaction for keyboard pressing. Pressing 0,1,2 keys 
+triggers event for appropriate buttons. When button state changes, mqtt message is generated. Scenario decorators are
+not used in this example.
+"""
+
 
 def on_press(key):
-    try:
+    if hasattr(key, 'char') and key.char in ['0', '1', '2']:
         print('alphanumeric key {0} pressed'.format(key.char))
-        switches[int(key.char)].set_state_v(SwitchState.ON)
-    except AttributeError:
+        buttons[int(key.char)].set_state_v(ButtonState.ON)
+    elif key == keyboard.Key.esc:
+        return False
+    else:
         print('special key {0} pressed'.format(key))
 
 
 def on_release(key):
     print('{0} released'.format(key))
-    # switches[key].set_state_v(SwitchState.OFF)
+    if hasattr(key, 'char') and key.char in ['0', '1', '2']:
+        print('alphanumeric key {0} pressed'.format(key.char))
+        buttons[int(key.char)].set_state_v(ButtonState.OFF)
 
-    if key == keyboard.Key.esc:
-        # Stop listener
+    elif key == keyboard.Key.esc:
         return False
 
 
