@@ -1,12 +1,12 @@
 from scenario_engine.executor import start_executing, every_event
-from virtual_devices.led_v import LED_V
+from virtual_devices.led_v import LEDV
 from mqtt.mqtt_client import MQTTClient
 
 client1 = MQTTClient("iot.eclipse.org")
 
-led1 = LED_V(1, 0, client1, "led/event/1")
-led2 = LED_V(1, 1, client1, "led/event/2")
-led3 = LED_V(1, 2, client1, "led/event/3")
+led1 = LEDV(1, 0, client1, "led/event/1")
+led2 = LEDV(1, 1, client1, "led/event/2")
+led3 = LEDV(1, 2, client1, "led/event/3")
 
 leds = {"led/event/1": led1, "led/event/2": led2, "led/event/3": led3}
 

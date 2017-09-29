@@ -1,7 +1,7 @@
 from scenario_engine.executor import emit_event
 
 
-class LED_V():
+class LEDV:
     device_topic = "fogdevicesplatform/fog_device_%d/slave/GPIO/%d"
 
     def __init__(self, dev, gpio_pin, mqtt_client, event):
@@ -13,10 +13,10 @@ class LED_V():
 
         self.mqtt_client.register(self.device_topic % (self.dev, self.adc_pin), self.listener)
 
-    def listener(self,msg):
-        #print("message is -> "+str(msg.payload))
+    def listener(self, msg):
+        print("message is -> " + str(msg.payload))
         emit_event(self.event)
-        #print("event is -> "+ self.event)
+        print("event is -> " + self.event)
         self.state = int(msg.payload)
 
     def get_state_v(self):

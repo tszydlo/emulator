@@ -9,14 +9,14 @@ import datetime
 from scenario_engine.executor import executor
 from scenario_engine.executor import start_executing, every_event, every
 from simulation_entities.temp_simulation_2d_world import TempSimulation2DWorld
-from virtual_devices.led_v import LED_V
+from virtual_devices.led_v import LEDV
 from virtual_devices.lm35_v import LM35_V
 from mqtt.mqtt_client import MQTTClient
 
 client1 = MQTTClient("iot.eclipse.org")
 
 # devices
-led1 = LED_V(1, 0, client1, "heater/event/1")
+led1 = LEDV(1, 0, client1, "heater/event/1")
 sensor1 = LM35_V(1, 0, client1)
 
 # simulation models
