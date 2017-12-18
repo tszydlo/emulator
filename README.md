@@ -7,4 +7,4 @@ Virtualized platform for testing IoT applications which enables a possibility to
 
 ## References
 
-Tomasz Szydlo, Joanna Sendorek, Leveraging virtualization for scenario based IoT application testing. FedCSIS Communication Papers 2017: 229-235
+_Tomasz Szydlo, Joanna Sendorek, Leveraging virtualization for scenario based IoT application testing. FedCSIS Communication Papers 2017: 229-235_
