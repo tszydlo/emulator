@@ -5,7 +5,8 @@ from virtual_devices.lm35_v import LM35_V
 from mqtt.mqtt_client import MQTTClient
 
 
-client1 = MQTTClient("149.156.100.177")
+#client1 = MQTTClient("149.156.100.177")
+client1 = MQTTClient("iot.eclipse.org")
 
 sensor1 = LM35_V(1, 0, client1)
 sensor2 = LM35_V(2, 0, client1)
