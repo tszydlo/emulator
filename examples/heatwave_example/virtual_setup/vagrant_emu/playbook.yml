@@ -1,0 +1,65 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: no
+  vars:
+    # docker_path: "{{ docker_file_path|default('./containers') }}"
+    docker_path: './containers'
+
+  pre_tasks:
+    - easy_install:
+        name: pip
+        state: latest 
+
+  tasks: 
+
+    - name: Download docker installer
+      get_url: url=https://get.docker.com/ dest=/tmp/docker-installer.sh
+
+    - name: Execute docker installer
+      script: /tmp/docker-installer.sh
+
+    - name: Wait for the Docker server to start
+      action: raw docker version
+      register: docker_version
+      until: docker_version.stdout.find("Client") != -1
+      retries: 30
+      delay: 10
+
+    - name: Install docker-py
+      pip: 
+        name: docker-py
+        version: 1.7.0
+
+    - name: Install docker-compose
+      pip: 
+        name: docker-compose 
+        version: 1.9.0
+
+    - name: Add docker host to the docker group
+      user:
+          name: ubuntu
+          groups: docker
+          append: yes
+
+    - name: Create an example container
+      docker_image:
+        path: "{{ docker_path }}"
+        name: device_image 
+
+    - name: Start many device containers
+      docker_container:
+        name: "{{ item.name_of_container }}"
+        image: device_image
+        state: started 
+        env:
+          DEVICE_ID: "{{ item.device_id }}"
+      with_items:
+        - {name_of_container : 'fog_device1', device_id : 'fog_device_1', artik_device : '4f90c312b096468bb643380e59599416' , artik_token : '252bf6d5fa26462c9f4e63fb9bfa186d'}   
+        - {name_of_container : 'fog_device2', device_id : 'fog_device_2', artik_device : '69558cf9df40482987539708334ef06a' , artik_token : '30f5d79759374a3396bd1e82b1988611'} 
+        
+
+         
+        

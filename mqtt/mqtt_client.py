@@ -1,7 +1,7 @@
 import paho.mqtt.client as paho
 
 
-class MQTTClient():
+class MQTTClient:
 
     def __init__(self, broker_host):
         self.callbacks_register = {}
@@ -28,7 +28,8 @@ class MQTTClient():
 
     @staticmethod
     def on_publish(mqttc, obj, mid):
-        print("mid: " + str(mid))
+        pass
+        # print("mid: " + str(mid))
 
     @staticmethod
     def on_subscribe(mqttc, obj, mid, granted_qos):
