@@ -1,12 +1,12 @@
 /*
- * vSensorManagerHAL_Arduino.h
+ * vSensorManagerHAL_mock.h
  *
- *  Created on: 29.03.2018
+ *  Created on: 09.05.2018
  *      Author: User
  */
 
-#ifndef VSENSORMANAGERHAL_ARDUINO_H_
-#define VSENSORMANAGERHAL_ARDUINO_H_
+#ifndef VSENSORMANAGERHAL_MOCK_H_
+#define VSENSORMANAGERHAL_MOCK_H_
 
 //GPIO functions
 void vSensorManager_setPinInterrupt(int pin);
@@ -19,5 +19,4 @@ void vSensorManager_setI2C();
 void vSensorManager_joinI2C(int addr);
 
 
-
-#endif /* VSENSORMANAGERHAL_ARDUINO_H_ */
+#endif /* VSENSORMANAGERHAL_MOCK_H_ */

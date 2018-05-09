@@ -1,6 +1,7 @@
 
 #include <Wire.h>
 #include "vSensormanager.h"
+//#include "vBME280.h"
 
 uint8_t last_reg;
 
@@ -11,10 +12,16 @@ boolean stringComplete = false;  // whether the string is complete
 
 vSensorManager_t sensor_manager;
 
+//vBME280_t sensor;
+
 void message_forwarder(char* message){
   Serial.println(message);
 }
-  
+
+void arduinoHAL_wire_begin(int addr){
+  Wire.begin(addr);
+}
+
 void setup() {
   //vBME280_init(&sensor);
   //vBME280_setTemp(&sensor, 35.76);
@@ -23,8 +30,10 @@ void setup() {
 
   vSensorManager_set_forwarder(&sensor_manager, &message_forwarder);
   
+
+  //Wire.begin(...) should be moved to vSensorManagerHAL_Arduino.c
+  Wire.begin(0x77); // join i2c bus with address #0x77
   
-  Wire.begin(0x77);                // join i2c bus with address #0x77
   Wire.onReceive(receiveEvent); // register event
   Wire.onRequest(requestEvent);
   Serial.begin(38400);           // start serial for output
@@ -36,8 +45,8 @@ void loop() {
   //delay(100);
     // print the string when a newline arrives:
   if (stringComplete) {
-    //Serial.println(inputString);
-    //printf(">|%s|<\n", inputString.c_str());
+    Serial.println(inputString);
+    printf(">|%s|<\n", inputString.c_str());
     //Serial.println(inputString.c_str());
     vSensorManager_ProcessMessage(&sensor_manager, inputString.c_str());
     
@@ -72,7 +81,11 @@ void requestEvent()
     //Wire.send(registerMap, REG_MAP_SIZE);  //Set the buffer up to send all 14 bytes of data
     //Wire.write(0x60);
     //Wire.write(vBME280_readRegister(&sensor,last_reg));
-    //////////Wire.write(vBME280_readRegisters(&sensor,last_reg), vBME280_readRegisterSize(&sensor,last_reg));
+    //Wire.write(vBME280_readRegisters(&sensor,last_reg), vBME280_readRegisterSize(&sensor,last_reg));
+    ////////Wire.write(vBME280_readRegisters(&sensor,last_reg), 30);
+
+    Wire.write(vSensorManager_i2c_readRegisters(&sensor_manager,0x77,last_reg), 30);
+    
     //Serial.println("REQUEST");
 }
 

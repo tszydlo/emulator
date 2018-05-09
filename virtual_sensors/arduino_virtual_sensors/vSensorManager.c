@@ -1,9 +1,21 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "vSensorTools.h"
 #include "vSensorManager.h"
 #include "vGPIOS.h"
 #include "vBME280.h"
 
+
+void vSensorManager_init(vSensorManager_t* vSensorManager){
+	vSensorManager->i2c_vsensors_count=0;
+}
+
+int vSensorManager_find_i2c_sensor(vSensorManager_t* vSensorManager, uint16_t address){
+	for(int i=0; i<vSensorManager->i2c_vsensors_count; i++){
+		if (address == vSensorManager->i2c_vsensors_addresses[i]) return i;
+	}
+	return -1;
+}
 
 ////////////////////////////////////////////////////////
 // Message Dispatcher //
@@ -50,10 +62,9 @@ void vSensorManager_ProcessMessage(vSensorManager_t* vSensorManager, char* messa
 			gpios_sens_p = (vGPIOS_t*)malloc(sizeof(vGPIOS_t));
 			vGPIOS_config(vSensorManager, sensor_number, gpios_sens_p, message + message_offset);
 		} else if (!vSensor_conditional_strcmp("BME280", sensor_name)) {
-			vBME280_t vbme280_sens;
-			//vSensorManager->sensors_object_types[sensor_number] = &vbme280_sens;
-			//vSensorManager->sensor_message_processors_fun[sensor_number] = &vBME280_config;
-			//vBME280_config(vSensorManager, &vbme280_sens, message+message_offset);
+			vBME280_t* vbme280_sens_p;
+			vbme280_sens_p = (vBME280_t*)malloc(sizeof(vBME280_t));
+			vBME280_config(vSensorManager, sensor_number, vbme280_sens_p, message + message_offset);
 		}
 	} else if (message[0] == 'R') {
 		//TODO
@@ -73,5 +84,36 @@ void vSensorManager_set_forwarder(vSensorManager_t* vSensorManager,
 	vSensorManager->fun_forwarder = fun_forwarder;
 }
 
-//ADC dispatcher
-//
+//I2C functions
+uint8_t vSensorManager_i2c_readRegister(vSensorManager_t* vSensorManager, uint16_t address, uint8_t reg){
+	int sens_addr = vSensorManager_find_i2c_sensor(vSensorManager, address);
+
+	if (sens_addr==-1) return -1;
+
+	return (*vSensorManager->i2c_readRegister_fun)(vSensorManager->sensors_object_types[ vSensorManager->i2c_vsensors_id[sens_addr] ],reg);
+}
+
+uint8_t* vSensorManager_i2c_readRegisters(vSensorManager_t* vSensorManager, uint16_t address, uint8_t reg){
+	int sens_addr = vSensorManager_find_i2c_sensor(vSensorManager, address);
+
+	if (sens_addr==-1) return -1;
+
+	return (*vSensorManager->i2c_readRegisters_fun)(vSensorManager->sensors_object_types[ vSensorManager->i2c_vsensors_id[sens_addr] ],reg);
+}
+
+uint8_t vSensorManager_i2c_readRegisterSize(vSensorManager_t* vSensorManager, uint16_t address, uint8_t reg){
+	int sens_addr = vSensorManager_find_i2c_sensor(vSensorManager, address);
+
+	if (sens_addr==-1) return -1;
+
+	return (*vSensorManager->i2c_readRegisterSize_fun)(vSensorManager->sensors_object_types[ vSensorManager->i2c_vsensors_id[sens_addr] ],reg);
+}
+
+void vSensorManager_i2c_writeRegister(vSensorManager_t* vSensorManager, uint16_t address, uint8_t reg, uint8_t val){
+	int sens_addr = vSensorManager_find_i2c_sensor(vSensorManager, address);
+
+	if (sens_addr==-1) return;
+
+	(*vSensorManager->i2c_writeRegister_fun)(vSensorManager->sensors_object_types[ vSensorManager->i2c_vsensors_id[sens_addr] ],reg,val);
+}
+
