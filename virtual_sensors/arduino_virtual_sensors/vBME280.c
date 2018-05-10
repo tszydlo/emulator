@@ -1,3 +1,4 @@
+//#include "vSensorManager.h"
 #include "vBME280.h"
 
 void vBME280_init(vBME280_t* sensor){
@@ -75,10 +76,39 @@ void vBME280_init(vBME280_t* sensor){
 	sensor->memory[0xE7-(0x88)]=0;
 }
 
+void vBME280_config(vSensorManager_t* sensor_manager, int sensor_id, vBME280_t* sensor, char* command){
+	vBME280_init(sensor);
+
+	uint8_t sensor_number = sensor_manager->i2c_vsensors_count;
+
+	sensor_manager->i2c_vsensors_addresses[ sensor_number ] = vBME280_addr;
+	sensor_manager->i2c_vsensors_count++;
+
+	sensor_manager->i2c_readRegisterSize_fun[sensor_number] = &vBME280_readRegisterSize;
+	sensor_manager->i2c_readRegister_fun[sensor_number] = &vBME280_readRegister;
+	sensor_manager->i2c_readRegisters_fun[sensor_number] = &vBME280_readRegisters;
+	sensor_manager->i2c_writeRegister_fun[sensor_number] = &vBME280_writeRegister;
+
+	sensor_manager->sensors_object_types[sensor_id] = sensor;
+	sensor_manager->i2c_vsensors_id[sensor_number] = sensor_id;
+	sensor_manager->sensor_message_processors_fun[sensor_id] = &vBME280_ProcessMessage;
+
+	vSensorManager_setI2C();
+	vSensorManager_joinI2C(vBME280_addr);
+
+	//in the current implementation there is nothing to parse in the configuration command
+}
+
 //T34.7P948.87H37.0
-void vBME280_config(vBME280_t* sensor, char* command){
+//void vBME280_config(vSensorManager_t* sensor_manager, int sensor_id, vBME280_t* sensor, char* command){
+
+
+void vBME280_ProcessMessage(void* sensor_type, char* command){
 	char type;
 	double value;
+
+	vBME280_t* sensor;
+	sensor = (vBME280_t*)sensor_type;
 
 	int idx=0;
 	int res_idx;
@@ -132,14 +162,23 @@ void vBME280_setPressure(vBME280_t* sensor, double p){
 	sensor->memory[0xF9-(0x88)]=adc_press&0x0F<<4;
 }
 
-uint8_t vBME280_readRegister(vBME280_t* sensor, uint8_t reg){
+uint8_t vBME280_readRegister(void* sensor_type, uint8_t reg){
+	vBME280_t* sensor;
+	sensor = (vBME280_t*)sensor_type;
+
 	return sensor->memory[reg-(0x88)];
 }
 
-uint8_t* vBME280_readRegisters(vBME280_t* sensor, uint8_t reg){
+uint8_t* vBME280_readRegisters(void* sensor_type, uint8_t reg){
+	vBME280_t* sensor;
+	sensor = (vBME280_t*)sensor_type;
+
 	return &(sensor->memory[reg-(0x88)]);
 }
-uint8_t vBME280_readRegisterSize(vBME280_t* sensor, uint8_t reg){
+uint8_t vBME280_readRegisterSize(void* sensor_type, uint8_t reg){
+	vBME280_t* sensor;
+	sensor = (vBME280_t*)sensor_type;
+
 	if ((reg==0xD0) || (reg==0xF2) || (reg==0xF3) || (reg==0xF4) || (reg==0xF5) || (reg==0xA1) || (reg==0xA3)){
 		return 1;
 	} else if ((reg==0xF7) || (reg==0xFA)){
@@ -147,7 +186,10 @@ uint8_t vBME280_readRegisterSize(vBME280_t* sensor, uint8_t reg){
 	} else return 2;
 }
 
-void vBME280_writeRegister(vBME280_t* sensor, uint8_t reg, uint8_t val){
+void vBME280_writeRegister(void* sensor_type, uint8_t reg, uint8_t val){
+	vBME280_t* sensor;
+	sensor = (vBME280_t*)sensor_type;
+
 	return;
 }
 
